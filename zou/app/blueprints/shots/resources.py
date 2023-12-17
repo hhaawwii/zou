@@ -14,6 +14,7 @@ from zou.app.services import (
     stats_service,
     tasks_service,
     user_service,
+    validation_service,
 )
 
 from zou.app.mixin import ArgsMixin
@@ -798,6 +799,66 @@ class ProjectSequencesResource(Resource, ArgsMixin):
             args["data"],
         )
 
+class ShotValidationResource(Resource):
+    @jwt_required
+    def get(self, shot_id):
+        """
+        Retrieve all the validation in order for the given shot
+        """
+        shot = shots_service.get_shot_with_relations(shot_id)
+        user_service.check_project_access(shot["project_id"])
+        user_service.check_entity_access(shot["id"])
+
+        return [
+            validation_service.get_validation_record(validation_id)
+            for validation_id in shot["validation_history"]
+        ]
+
+    @jwt_required
+    def post(self, shot_id):
+        """
+        Create a new validation record from the current validation
+        """
+        shot = shots_service.get_shot(shot_id)
+        user_service.check_project_access(shot["project_id"])
+        user_service.check_entity_access(shot["id"])
+
+        frame_set = self.get_arguments()
+        validation_record = validation_service.create_validation_record(
+            shot_id, {"frame_set": frame_set}
+        )
+        return validation_record
+
+    @jwt_required
+    def delete(self, shot_id):
+        """
+        Remove the given frame set
+        """
+        shot = shots_service.get_shot(shot_id)
+        user_service.check_project_access(shot["project_id"])
+        user_service.check_entity_access(shot["id"])
+
+        frame_set = self.get_arguments()
+        validation_record = validation_service.create_validation_record(
+            shot_id, {"frame_set": frame_set}, substract=True
+        )
+        return validation_record
+
+    def get_arguments(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("frame_set", required=True)
+        args = parser.parse_args()
+        return args["frame_set"]
+
+class ShotRenderTimeResource(Resource):
+    """
+    Retrieve the render time per frame for the given shot.
+    If the shot does not have any info the info of the sequence is used
+    """
+
+    def get(self, entity_id):
+        entity = entities_service.get_entity(entity_id)
+        return {"render_time": entities_service.get_entity_render_time(entity)}
 
 class ProjectEpisodesResource(Resource, ArgsMixin):
     @jwt_required()

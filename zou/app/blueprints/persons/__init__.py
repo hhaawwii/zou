@@ -29,9 +29,13 @@ from zou.app.blueprints.persons.resources import (
     RemoveFromDepartmentResource,
     ChangePasswordForPersonResource,
     DisableTwoFactorAuthenticationPersonResource,
+    ScoresResource,
+    GameVariantsResource,
 )
 
 routes = [
+    ("/data/persons/<person_id>/scores", ScoresResource),
+    ("/data/persons/<person_id>/game_variants", GameVariantsResource),
     ("/data/persons/new", NewPersonResource),
     ("/data/persons/<person_id>/desktop-login-logs", DesktopLoginsResource),
     ("/data/persons/presence-logs/<month_date>", PresenceLogsResource),

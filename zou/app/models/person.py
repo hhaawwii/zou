@@ -46,6 +46,13 @@ CONTRACT_TYPES = [
     ("internship", "Internship"),
 ]
 
+game_variant_link = db.Table(
+    "variant_link",
+    db.Column("person_id", UUIDType(binary=False), db.ForeignKey("person.id")),
+    db.Column(
+        "variant_id", UUIDType(binary=False), db.ForeignKey("game_variant.id")
+    ),
+)
 
 class Person(db.Model, BaseMixin, SerializerMixin):
     """
@@ -57,6 +64,11 @@ class Person(db.Model, BaseMixin, SerializerMixin):
     email = db.Column(EmailType, unique=True)
     phone = db.Column(db.String(30))
     contract_type = db.Column(ChoiceType(CONTRACT_TYPES), default="permanent")
+    coins = db.Column(db.Integer, default=0, nullable=False)
+    scores = db.relationship("GameScore", back_populates="player")
+    game_variants = db.relationship(
+        "GameVariant", secondary=game_variant_link, back_populates="owners"
+    )
 
     active = db.Column(db.Boolean(), default=True)
     archived = db.Column(db.Boolean(), default=False)
@@ -97,6 +109,9 @@ class Person(db.Model, BaseMixin, SerializerMixin):
 
     departments = db.relationship(
         "Department", secondary=department_link, lazy="joined"
+    )
+    projects = db.relationship(
+        "Project", secondary="project_person_link", back_populates="team"
     )
 
     is_generated_from_ldap = db.Column(db.Boolean(), default=False)

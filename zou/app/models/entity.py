@@ -89,6 +89,10 @@ class Entity(db.Model, BaseMixin, SerializerMixin):
     nb_frames = db.Column(db.Integer)  # Specific to shots
     nb_entities_out = db.Column(db.Integer, default=0)
     is_casting_standby = db.Column(db.Boolean, default=False)
+    render_time = db.Column(db.Integer)
+    validation_history = db.relationship(
+        "ValidationRecord", back_populates="shot"
+    )
 
     status = db.Column(ChoiceType(ENTITY_STATUSES), default="running")
 

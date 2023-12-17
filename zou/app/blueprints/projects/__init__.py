@@ -26,9 +26,13 @@ from zou.app.blueprints.projects.resources import (
     ProductionEpisodesScheduleItemsResource,
     ProductionSequencesScheduleItemsResource,
     ProductionTimeSpentsResource,
+    ProductionProgressResource,
+    ProductionsProgressResource,
 )
 
 routes = [
+    ("/data/projects/progress", ProductionsProgressResource),
+    ("/data/projects/<project_id>/progress", ProductionProgressResource),
     ("/data/projects/open", OpenProjectsResource),
     ("/data/projects/all", AllProjectsResource),
     ("/data/projects/<project_id>/team", ProductionTeamResource),

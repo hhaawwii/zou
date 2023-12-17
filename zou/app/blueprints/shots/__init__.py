@@ -42,6 +42,8 @@ from zou.app.blueprints.shots.resources import (
     EpisodeAssetTasksResource,
     SequenceShotTasksResource,
     ProjectQuotasResource,
+    ShotValidationResource,
+    ShotRenderTimeResource,
 )
 
 routes = [
@@ -94,6 +96,8 @@ routes = [
         "/data/projects/<project_id>/quotas/<task_type_id>",
         ProjectQuotasResource,
     ),
+    ("/data/shots/<shot_id>/validation", ShotValidationResource),
+    ("/data/shots/<shot_id>/render-time", ShotRenderTimeResource),
 ]
 
 

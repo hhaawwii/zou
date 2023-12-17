@@ -442,6 +442,52 @@ class PersonDoneTasksResource(Resource):
         return tasks_service.get_person_done_tasks(person_id, projects)
 
 
+class CreateShotTaskResource(Resource):
+    """
+    Create a new task for given shot and task type.
+    """
+
+    @jwt_required
+    def post(self, project_id, task_type_id):
+        user_service.check_manager_project_access(project_id)
+        task_type = tasks_service.get_task_type(task_type_id)
+
+        shot_id = request.json["shot"]
+        task_name = request.json.get("name", "main")
+
+        shot = shots_service.get_shot(shot_id)
+        if shot["project_id"] != project_id:
+            return {
+                "error": True,
+                "message": "The given shot does not belong to your project.",
+            }, 400
+
+        tasks = tasks_service.create_task(task_type, shot, task_name)
+        return tasks, 201
+
+class CreateAssetTaskResource(Resource):
+    """
+    Create a new task for given shot and task type.
+    """
+
+    @jwt_required
+    def post(self, project_id, task_type_id):
+        user_service.check_manager_project_access(project_id)
+        task_type = tasks_service.get_task_type(task_type_id)
+
+        asset_id = request.json["shot"]
+        task_name = request.json.get("name", "main")
+
+        asset = assets_service.get_asset(asset_id)
+        if asset["project_id"] != project_id:
+            return {
+                "error": True,
+                "message": "The given shot does not belong to your project.",
+            }, 400
+
+        tasks = tasks_service.create_task(task_type, asset, task_name)
+        return tasks, 201
+
 class CreateShotTasksResource(Resource):
     """
     Create a new task for given shot and task type.

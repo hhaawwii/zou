@@ -96,6 +96,7 @@ class Comment(db.Model, BaseMixin, SerializerMixin):
     task_status_id = db.Column(
         UUIDType(binary=False), db.ForeignKey("task_status.id"), index=True
     )
+    task_status = db.relationship("TaskStatus", backref="comments")
     person_id = db.Column(
         UUIDType(binary=False),
         db.ForeignKey("person.id"),

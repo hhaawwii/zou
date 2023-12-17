@@ -14,6 +14,7 @@ from zou.app.services import (
     time_spents_service,
     shots_service,
     user_service,
+    gaming_service,
 )
 from zou.app.utils import permissions, csv_utils, auth, emails, fields
 from zou.app.services.exception import (
@@ -1368,3 +1369,23 @@ Thank you and see you soon on Kitsu,
                 "error": True,
                 "message": "Two factor authentication not enabled for this user.",
             }, 400
+class ScoresResource(Resource, ArgsMixin):
+    def get(self, person_id):
+        (game, page_size, page_index) = self.get_argument()
+        return gaming_service.get_scores_by_player(
+            person_id, game=game, page_size=page_size, page_index=page_index
+        )
+
+    def get_argument(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("game", type=str)
+        parser.add_argument("page_size", type=int)
+        parser.add_argument("page_index", type=int, default=0)
+        args = parser.parse_args()
+
+        return args["game"], args["page_size"], args["page_index"]
+
+
+class GameVariantsResource(Resource, ArgsMixin):
+    def get(self, person_id):
+        return gaming_service.get_owned_game_variant(person_id)

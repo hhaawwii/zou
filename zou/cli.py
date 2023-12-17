@@ -119,10 +119,11 @@ def clear_memory_cache():
 
 
 @cli.command()
-def reset_migrations():
+@click.argument("revision", default="base")
+def reset_migrations(revision):
     "Set the database schema revision to first one."
     with app.app_context():
-        flask_migrate.stamp(directory=migrations_path, revision="base")
+        flask_migrate.stamp(directory=migrations_path, revision=revision)
 
 
 @cli.command()
@@ -534,7 +535,14 @@ def reset_movie_files_metadata():
     Store height and width metadata for all movie previews in the database.
     """
     commands.reset_movie_files_metadata()
-
+    
+@cli.command()
+@click.option("--user")
+def reset_user_password(user):
+    """
+    Reset a password for the given user email to default
+    """
+    commands.reset_user_password(user)
 
 @cli.command()
 def reset_picture_files_metadata():

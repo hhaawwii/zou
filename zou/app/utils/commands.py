@@ -8,6 +8,7 @@ import tempfile
 
 from ldap3 import Server, Connection, ALL, NTLM, SIMPLE
 from zou.app.utils import thumbnail as thumbnail_utils
+from zou.app.utils import auth
 from zou.app.stores import auth_tokens_store, file_store
 from zou.app.services import (
     assets_service,
@@ -75,6 +76,7 @@ def init_data():
         assets_service.get_or_create_asset_type("Prop")
         assets_service.get_or_create_asset_type("Environment")
         assets_service.get_or_create_asset_type("FX")
+        assets.service.get_or_create_asset_type("Vehicle")
         print("Asset types initialized.")
 
         shots_service.get_episode_type()
@@ -600,6 +602,10 @@ def upload_files_to_cloud_storage(days):
 def reset_tasks_data(project_id):
     with app.app_context():
         tasks_service.reset_tasks_data(project_id)
+
+def reset_user_password(user_email):
+    password = auth.encrypt_password("default")
+    persons_service.update_password(user_email, password)
 
 
 def remove_old_data(days_old=90):

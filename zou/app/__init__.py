@@ -8,6 +8,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_mail import Mail
 
+from flask_graphql import GraphQLView
+
 from jwt import ExpiredSignatureError
 from babel.core import UnknownLocaleError
 from meilisearch.errors import (
@@ -149,8 +151,18 @@ def configure_auth():
 
 def load_api(app):
     from zou.app import api
+    from .graphql.schema import schema
 
     api.configure(app)
+
+    app.add_url_rule(
+        "/graphql",
+        view_func=GraphQLView.as_view(
+            "graphql",
+            schema=schema,
+            graphiql=True,  # for having the GraphiQL interface
+        ),
+    )
 
     fs.mkdir_p(app.config["TMP_DIR"])
     configure_auth()

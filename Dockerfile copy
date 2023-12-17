@@ -1,0 +1,49 @@
+ARG PY_V=3.9
+
+FROM python:${PY_V}-slim as builder
+USER root
+
+RUN apt update \
+    && apt install -y --no-install-recommends make python3-dev gcc g++ \
+    && apt autoclean \
+    && rm -rf /var/lib/apt/lists/*
+
+ARG PY_V
+ARG ZOU_VERSION
+
+
+
+COPY ./requirements.txt /opt/zou/requirements.txt
+COPY ./setup.py /opt/zou/setup.py
+COPY ./setup.cfg /opt/zou/setup.cfg
+
+WORKDIR /opt/zou
+RUN pip install -r requirements.txt
+
+COPY . /opt/zou
+
+RUN pip install --upgrade pip wheel setuptools
+RUN pip install .
+RUN apk del .build-deps
+
+FROM python:${PY_V}-slim
+USER root
+
+RUN apt update \
+    && apt install -y --no-install-recommends ffmpeg bzip2 postgresql-client \
+    && apt autoclean \
+    && rm -rf /var/lib/apt/lists/*
+
+ARG PY_V
+
+# COPY --from=builder /usr/local/lib/python${PY_V} /usr/local/lib/python${PY_V}
+# COPY --from=builder /usr/local/bin /usr/local/bin
+
+ENV ZOU_FOLDER /usr/local/lib/python${PY_V}/site-packages/zou
+WORKDIR ${ZOU_FOLDER}
+
+COPY init_zou.sh /init_zou.sh
+COPY upgrade_zou.sh /upgrade_zou.sh
+
+# COPY scripts/init_zou.sh ./init_zou.sh
+# COPY scripts/upgrade_zou.sh ./upgrade_zou.sh

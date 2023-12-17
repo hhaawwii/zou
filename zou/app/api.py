@@ -26,6 +26,8 @@ from zou.app.blueprints.shots import blueprint as shots_blueprint
 from zou.app.blueprints.tasks import blueprint as tasks_blueprint
 from zou.app.blueprints.user import blueprint as user_blueprint
 from zou.app.blueprints.edits import blueprint as edits_blueprint
+from zou.app.blueprints.edits import blueprint as gaming_blueprint
+
 
 
 def configure(app):
@@ -66,6 +68,7 @@ def configure_api_routes(app):
     app.register_blueprint(user_blueprint)
     app.register_blueprint(edits_blueprint)
     app.register_blueprint(search_blueprint)
+    app.register_blueprint(gaming_blueprint)
     return app
 
 

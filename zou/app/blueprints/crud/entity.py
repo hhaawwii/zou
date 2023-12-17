@@ -106,6 +106,9 @@ class EntityResource(BaseModelResource, EntityEventMixin):
             extra_data = copy.copy(entity.data) or {}
             if "data" not in data or data["data"] is None:
                 data["data"] = {}
+            for specific_data in ["fps", "frame_in", "frame_out"]:
+                if specific_data in data:
+                    data["data"][specific_data] = data.pop(specific_data)
             extra_data.update(data["data"])
             data["data"] = extra_data
 

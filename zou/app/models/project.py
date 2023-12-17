@@ -110,6 +110,7 @@ class Project(db.Model, BaseMixin, SerializerMixin):
     description = db.Column(db.Text())
     shotgun_id = db.Column(db.Integer)
     file_tree = db.Column(JSONB)
+    color = db.Column(db.String(7))
     data = db.Column(JSONB)
     has_avatar = db.Column(db.Boolean(), default=False)
     fps = db.Column(db.String(10), default=25)
@@ -138,7 +139,7 @@ class Project(db.Model, BaseMixin, SerializerMixin):
         index=True,
     )
 
-    team = db.relationship("Person", secondary="project_person_link")
+    team = db.relationship("Person", secondary="project_person_link",back_populates="projects")
     asset_types = db.relationship(
         "EntityType", secondary="project_asset_type_link"
     )

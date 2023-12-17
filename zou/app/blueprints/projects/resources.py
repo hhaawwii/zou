@@ -1,6 +1,7 @@
-from flask_restful import Resource
+from flask_restful import Resource ,reqparse
 from flask_jwt_extended import jwt_required
 
+import matching
 
 from zou.app.mixin import ArgsMixin
 from zou.app.services import (
@@ -8,6 +9,7 @@ from zou.app.services import (
     schedule_service,
     tasks_service,
     user_service,
+    validation_service,
 )
 from zou.app.utils import permissions
 from zou.app.services.exception import WrongParameterException
@@ -32,10 +34,8 @@ class OpenProjectsResource(Resource, ArgsMixin):
               description: All running projects
         """
         name = self.get_text_parameter("name")
-        if permissions.has_admin_permissions():
-            return projects_service.open_projects(name)
-        else:
-            return user_service.get_open_projects(name)
+        return projects_service.open_projects(name=name)
+
 
 
 class AllProjectsResource(Resource, ArgsMixin):
@@ -1083,3 +1083,55 @@ class ProductionSequencesScheduleItemsResource(Resource):
         return schedule_service.get_sequences_schedule_items(
             project_id, task_type_id
         )
+class ProductionProgressResource(Resource):
+    """
+    Resource to retrieve progress along time of the project
+    """
+
+    @jwt_required
+    def get(self, project_id):
+        user_service.check_project_access(project_id)
+        user_service.block_access_to_vendor()
+        trunc_key = self.get_arguments()
+        project_progress = validation_service.get_project_progress(
+            project_id, trunc_key
+        )
+        return [
+            {
+                **progress,
+                "date": math.floor(progress["date"].timestamp() * 1000),
+            }
+            for progress in project_progress
+        ]
+
+    def get_arguments(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("trunc_key", required=False)
+        args = parser.parse_args()
+        return args.get("trunc_key", "day")
+
+
+class ProductionsProgressResource(Resource):
+    """
+    Resource to retrieve progress along time of all the projects
+    """
+
+    def get(self):
+        trunc_key, average_key = self.get_arguments()
+        projects_progress = validation_service.get_projects_progress(
+            trunc_key, average_key=average_key
+        )
+        return [
+            {
+                **progress,
+                "date": math.floor(progress["date"].timestamp() * 1000),
+            }
+            for progress in projects_progress
+        ]
+
+    def get_arguments(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("trunc_key", required=False)
+        parser.add_argument("average_key", required=False)
+        args = parser.parse_args()
+        return args.get("trunc_key", "day"), args.get("average_key", "AVERAGE")
